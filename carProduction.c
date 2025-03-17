@@ -212,7 +212,7 @@ void* titanoRobot(void* ptr){
         }
 
         Node* node = dequeue(info->powertrainConveyor->powertrainQueue);
-        info->poweredChassisConveyor->consumed[node->trainType]++;
+        info->powertrainConveyor->consumed[node->trainType]++;
 
         unsigned int* inAssemblyQueue = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
         for(int i = 0; i < PowertrainTypeN; i++){
@@ -244,7 +244,7 @@ void* titanoRobot(void* ptr){
         log_added_poweredchassis(chassisNode->string, info->poweredChassisConveyor->poweredChassisQueue->length);
         free(node);
         sem_post(info->poweredChassisConveyor->chassisMutex);
-        sem_post(info->poweredChassisConveyor->chassisEmpty);
+        sem_post(info->poweredChassisConveyor->chassisFull);
     }
     return NULL;
 }
@@ -265,7 +265,7 @@ void* megaForceRobot(void *ptr){
         }
 
         Node* node = dequeue(info->powertrainConveyor->powertrainQueue);
-        info->poweredChassisConveyor->consumed[node->trainType]++;
+        info->powertrainConveyor->consumed[node->trainType]++;
 
         unsigned int* inAssemblyQueue = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
         for(int i = 0; i < PowertrainTypeN; i++){
@@ -297,7 +297,7 @@ void* megaForceRobot(void *ptr){
         log_added_poweredchassis(chassisNode->string, info->poweredChassisConveyor->poweredChassisQueue->length);
         free(node);
         sem_post(info->poweredChassisConveyor->chassisMutex);
-        sem_post(info->poweredChassisConveyor->chassisEmpty);
+        sem_post(info->poweredChassisConveyor->chassisFull);
     }
     return NULL;
 }
@@ -319,7 +319,9 @@ void* roboMountRobot(void *ptr){
             }
         }
 
-        log_removed_poweredchassis(node->string, info->poweredChassisConveyor->poweredChassisQueue->length, totalConsumed);
+        char str[50];
+        strcpy(str, node->string);
+        log_removed_poweredchassis(str, info->poweredChassisConveyor->poweredChassisQueue->length, totalConsumed);
         free(node);
 
         sem_post(info->poweredChassisConveyor->chassisMutex);

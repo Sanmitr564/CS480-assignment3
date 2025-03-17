@@ -22,7 +22,7 @@ int main(int argc, char **argv){
     int roboTime = 0;
     int option;
 
-    while((option = getopt(argc, argv, "n:g:h:t:m:r")) != -1){
+    while((option = getopt(argc, argv, "n:g:h:t:m:r:")) != -1){
         switch(option){
             case 'n':
                 numVehicles = atoi(optarg);

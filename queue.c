@@ -21,6 +21,7 @@ Node* dequeue(Queue* queue){
     }
     Node* toRemove = queue->head;
     queue->head = toRemove->next;
+    toRemove->next = NULL;
 
     queue->length--;
     return toRemove;
