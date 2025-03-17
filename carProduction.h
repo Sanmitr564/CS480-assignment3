@@ -1,4 +1,5 @@
 #include <semaphore.h>
+
 #include "queue.h"
 
 struct PowertrainConveyor{
@@ -57,17 +58,3 @@ PowertrainProducer* newPowertrainProducer(PowertrainConveyor* conveyor, int numT
 PoweredChassisProducer* newPoweredChassisProducer(PowertrainConveyor* powerTrainConveyor, PoweredChassisConveyor* poweredChassisConveyer, int numToProduce, unsigned int sleep);
 
 PoweredChassisConsumer* newPoweredChassisConsumer(PoweredChassisConveyor* conveyor, int numToProduce, unsigned int sleep);
-
-void freePowertrainConveyor(PowertrainConveyor* conveyor);
-
-
-
-void* gasEngine(void *ptr);
-
-void* hybridEngine(void *ptr);
-
-void* titanoRobot(void *ptr);
-
-void* megaForceRobot(void *ptr);
-
-void* roboMountRobot(void *ptr);

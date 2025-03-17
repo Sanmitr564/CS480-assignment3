@@ -1,8 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
+
 #include "queue.h"
 #include "car_assemble.h"
-
 
 void enqueue(Queue* queue, Node* node){
     if(queue->head == NULL){
@@ -28,7 +28,7 @@ Node* dequeue(Queue* queue){
 }
 
 Node* newNode(char *str, PowertrainType trainType, ChassisRobotType chassisType){
-    if(strlen(str) > 50){
+    if(strlen(str) > NODE_STR_LEN){
         return NULL;
     }
 

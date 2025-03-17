@@ -8,7 +8,7 @@ CC = gcc
 CCFLAGS = -std=gnu99 -Wall -g3 -c
 
 # object files
-OBJS = main.o log.o queue.o carProduction.o
+OBJS = main.o log.o queue.o carProduction.o robotFunctionality.o
 
 # Program name
 PROGRAM = carassemble
@@ -28,6 +28,9 @@ queue.o: queue.c queue.h
 
 carProduction.o: carProduction.c carProduction.h
 	$(CC) $(CCFLAGS) carProduction.c
+
+robotFunctionality.o: robotFunctionality.c robotFunctionality.h
+	$(CC) $(CCFLAGS) robotFunctionality.c
 
 # Once things work, people frequently delete their object files.
 # If you use "make clean", this will do it for you.

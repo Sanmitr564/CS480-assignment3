@@ -3,16 +3,13 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <stdlib.h>
-
 #include <string.h>
 #include <pthread.h>
-// #include <fstream>
-// #include <iostream>
 
 #include "car_assemble.h"
 #include "log.h"
 #include "carProduction.h"
-
+#include "robotFunctionality.h"
 
 int main(int argc, char **argv){
     int numVehicles = 100;

@@ -1,7 +1,9 @@
 #include "car_assemble.h"
 
+#define NODE_STR_LEN 50
+
 typedef struct Node {
-    char string[50];
+    char string[NODE_STR_LEN];
     PowertrainType trainType;
     ChassisRobotType chassisType;
     struct Node* next;
