@@ -15,13 +15,12 @@ PowertrainConveyor* newPowertrainConveyor(){
     sem_t* powertrainEmpty = (sem_t*)malloc(sizeof(sem_t));
     sem_t* powertrainFull = (sem_t*)malloc(sizeof(sem_t));
     sem_t* hybridEmpty = (sem_t*)malloc(sizeof(sem_t));
-    sem_t* hybridFull = (sem_t*)malloc(sizeof(sem_t));
+
     if(
         sem_init(powertrainMutex, 0, 1) == -1 ||
         sem_init(powertrainEmpty, 0, PowertrainConveyorMax) == -1 ||
         sem_init(powertrainFull, 0, 0) == -1 ||
-        sem_init(hybridEmpty, 0, HybridMax) == -1 ||
-        sem_init(hybridFull, 0, 0) == -1
+        sem_init(hybridEmpty, 0, HybridMax) == -1
     ){
         printf("Couldn't initialize semaphores for PowertrainConveyor");
         exit(-1);
@@ -41,20 +40,10 @@ PowertrainConveyor* newPowertrainConveyor(){
     newConveyor->powertrainEmpty = powertrainEmpty;
     newConveyor->powertrainFull = powertrainFull;
     newConveyor->hybridEmpty = hybridEmpty;
-    newConveyor->hybridFull = hybridFull;
     newConveyor->produced = produced;
     newConveyor->consumed = consumed;
 
     return newConveyor;
-}
-
-PowertrainProducer* newPowertrainProducer(PowertrainConveyor* conveyor, int numToProduce, unsigned int sleep){
-    PowertrainProducer* newProducer = (PowertrainProducer*)(malloc(sizeof(PowertrainProducer)));
-    newProducer->powertrainConveyor = conveyor;
-    newProducer->numToProduce = numToProduce;
-    newProducer->sleep = sleep;
-
-    return newProducer;
 }
 
 PoweredChassisConveyor* newPoweredChassisConveyor(){
@@ -90,6 +79,25 @@ PoweredChassisConveyor* newPoweredChassisConveyor(){
     return newConveyor;
 }
 
+PowertrainProducer* newPowertrainProducer(PowertrainConveyor* conveyor, int numToProduce, unsigned int sleep){
+    PowertrainProducer* newProducer = (PowertrainProducer*)(malloc(sizeof(PowertrainProducer)));
+    newProducer->powertrainConveyor = conveyor;
+    newProducer->numToProduce = numToProduce;
+    newProducer->sleep = sleep;
+
+    return newProducer;
+}
+
+PoweredChassisProducer* newPoweredChassisProducer(PowertrainConveyor* powerTrainConveyor, PoweredChassisConveyor* poweredChassisConveyer, int numToProduce, unsigned int sleep){
+    PoweredChassisProducer* conveyor = (PoweredChassisProducer*)malloc(sizeof(PoweredChassisProducer));
+    conveyor->powertrainConveyor = powerTrainConveyor;
+    conveyor->poweredChassisConveyor = poweredChassisConveyer;
+    conveyor->numToProduce = numToProduce;
+    conveyor->sleep = sleep;
+
+    return conveyor;
+}
+
 PoweredChassisConsumer* newPoweredChassisConsumer(PoweredChassisConveyor* conveyor, int numToProduce, unsigned int sleep){
     sem_t* barrier = (sem_t*)malloc(sizeof(sem_t));
     if(sem_init(barrier, 0, 0) == -1){
@@ -106,15 +114,7 @@ PoweredChassisConsumer* newPoweredChassisConsumer(PoweredChassisConveyor* convey
     return consumer;
 }
 
-PoweredChassisProducer* newPoweredChassisProducer(PowertrainConveyor* powerTrainConveyor, PoweredChassisConveyor* poweredChassisConveyer, int numToProduce, unsigned int sleep){
-    PoweredChassisProducer* conveyor = (PoweredChassisProducer*)malloc(sizeof(PoweredChassisProducer));
-    conveyor->powertrainConveyor = powerTrainConveyor;
-    conveyor->poweredChassisConveyor = poweredChassisConveyer;
-    conveyor->numToProduce = numToProduce;
-    conveyor->sleep = sleep;
 
-    return conveyor;
-}
 
 void* gasEngine(void *ptr){
     PowertrainProducer* info = (PowertrainProducer*)ptr;
@@ -191,7 +191,6 @@ void* hybridEngine(void *ptr){
 
         sem_post(info->powertrainConveyor->powertrainMutex);
         sem_post(info->powertrainConveyor->powertrainFull);
-        sem_post(info->powertrainConveyor->hybridFull);
     }
     return NULL;
 }

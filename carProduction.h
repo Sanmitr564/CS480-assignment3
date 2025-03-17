@@ -7,7 +7,6 @@ struct PowertrainConveyor{
     sem_t* powertrainEmpty;
     sem_t* powertrainFull;
     sem_t* hybridEmpty;
-    sem_t* hybridFull;
 
     unsigned int* produced;
     unsigned int* consumed;
@@ -51,13 +50,17 @@ typedef enum QueueRestraints{
 
 PowertrainConveyor* newPowertrainConveyor();
 
+PoweredChassisConveyor* newPoweredChassisConveyor();
+
 PowertrainProducer* newPowertrainProducer(PowertrainConveyor* conveyor, int numToProduce, unsigned int sleep);
 
-PoweredChassisConveyor* newPoweredChassisConveyor();
+PoweredChassisProducer* newPoweredChassisProducer(PowertrainConveyor* powerTrainConveyor, PoweredChassisConveyor* poweredChassisConveyer, int numToProduce, unsigned int sleep);
 
 PoweredChassisConsumer* newPoweredChassisConsumer(PoweredChassisConveyor* conveyor, int numToProduce, unsigned int sleep);
 
-PoweredChassisProducer* newPoweredChassisProducer(PowertrainConveyor* powerTrainConveyor, PoweredChassisConveyor* poweredChassisConveyer, int numToProduce, unsigned int sleep);
+void freePowertrainConveyor(PowertrainConveyor* conveyor);
+
+
 
 void* gasEngine(void *ptr);
 
