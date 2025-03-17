@@ -53,7 +53,7 @@ PowertrainConveyor* newPowertrainConveyor();
 
 PowertrainProducer* newPowertrainProducer(PowertrainConveyor* conveyor, int numToProduce, unsigned int sleep);
 
-PoweredChassisConsumer* newPoweredChassisConveyor();
+PoweredChassisConveyor* newPoweredChassisConveyor();
 
 PoweredChassisConsumer* newPoweredChassisConsumer(PoweredChassisConveyor* conveyor, int numToProduce, unsigned int sleep);
 

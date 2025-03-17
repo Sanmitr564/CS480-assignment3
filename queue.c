@@ -4,11 +4,13 @@
 #include "car_assemble.h"
 
 
-int enqueue(Queue* queue, Node* node){
+void enqueue(Queue* queue, Node* node){
     if(queue->head == NULL){
         queue->head = node;
+        queue->tail = node;
     }else{
         queue->tail->next = node;
+        queue->tail = node;
     }
     queue->length++;
 }
@@ -26,7 +28,7 @@ Node* dequeue(Queue* queue){
 
 Node* newNode(char *str, PowertrainType trainType, ChassisRobotType chassisType){
     if(strlen(str) > 50){
-        return -1;
+        return NULL;
     }
 
     Node* newNode = (Node*)(malloc(sizeof(Node)));

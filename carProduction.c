@@ -1,11 +1,11 @@
 #include "carProduction.h"
 #include "stdlib.h"
 #include "car_assemble.h"
-#include "queue.h"
 #include <stdbool.h>
 #include <time.h>
 #include "log.h"
 #include <string.h>
+#include <stdio.h>
 
 PowertrainConveyor* newPowertrainConveyor(){
     Queue* powertrainQueue = newQueue();
@@ -27,8 +27,8 @@ PowertrainConveyor* newPowertrainConveyor(){
         exit(-1);
     }
 
-    unsigned int* produced = (int*)malloc(PowertrainTypeN * sizeof(int));
-    unsigned int* consumed = (int*)malloc(PowertrainTypeN * sizeof(int));
+    unsigned int* produced = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
+    unsigned int* consumed = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
     for(int i = 0; i < PowertrainTypeN; i++){
         produced[i] = 0;
         consumed[i] = 0;
@@ -57,7 +57,7 @@ PowertrainProducer* newPowertrainProducer(PowertrainConveyor* conveyor, int numT
     return newProducer;
 }
 
-PoweredChassisConsumer* newPoweredChassisConveyor(){
+PoweredChassisConveyor* newPoweredChassisConveyor(){
     Queue* queue = newQueue();
 
     sem_t* chassisMutex = (sem_t*)malloc(sizeof(sem_t));
@@ -72,9 +72,9 @@ PoweredChassisConsumer* newPoweredChassisConveyor(){
         exit(-1);
     }
 
-    unsigned int** consumed = (int**)malloc(ChassisRobotTypeN * sizeof(int*));
+    unsigned int** consumed = (unsigned int**)malloc(ChassisRobotTypeN * sizeof(int*));
     for(int i = 0; i < ChassisRobotTypeN; i++){
-        consumed[i] = (int*)malloc(PowertrainTypeN * sizeof(int));
+        consumed[i] = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
         for(int j = 0; j < PowertrainTypeN; j++){
             consumed[i][j] = 0;
         }
@@ -118,9 +118,9 @@ PoweredChassisProducer* newPoweredChassisProducer(PowertrainConveyor* powerTrain
 
 void* gasEngine(void *ptr){
     PowertrainProducer* info = (PowertrainProducer*)ptr;
-    struct timespec sleepTime = {0, info->sleep * 1000000};
+    const struct timespec sleepTime = {0, info->sleep * 1000000};
     while(true){
-        nanosleep(sleepTime, NULL);
+        nanosleep(&sleepTime, NULL);
 
         sem_wait(info->powertrainConveyor->powertrainEmpty);
         sem_wait(info->powertrainConveyor->powertrainMutex);
@@ -130,14 +130,18 @@ void* gasEngine(void *ptr){
             produced += info->powertrainConveyor->produced[i];
         }
         if(info->numToProduce == produced){
+            sem_post(info->powertrainConveyor->powertrainMutex);
             break; 
         }
+        
+        char str[50];
+        strcpy(str, powertrain_producerNames[GasEngine]);
 
-        Node* node = newNode(powertrain_producerNames[GasEngine], GasEngine, NULL);
+        Node* node = newNode(str, GasEngine, 0);
         enqueue(info->powertrainConveyor->powertrainQueue, node);
         info->powertrainConveyor->produced[GasEngine]++;
         
-        int* inAssemblyQueue = (int*)malloc(PowertrainTypeN * sizeof(int));
+        unsigned int* inAssemblyQueue = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
         for(int i = 0; i < PowertrainTypeN; i++){
             inAssemblyQueue[i] = info->powertrainConveyor->produced[i] - info->powertrainConveyor->consumed[i];
         }
@@ -148,13 +152,14 @@ void* gasEngine(void *ptr){
         sem_post(info->powertrainConveyor->powertrainMutex);
         sem_post(info->powertrainConveyor->powertrainFull);
     }
+    return NULL;
 }
 
 void* hybridEngine(void *ptr){
     PowertrainProducer* info = (PowertrainProducer*)ptr;
-    struct timespec sleepTime = {0, info->sleep * 1000000};
+    const struct timespec sleepTime = {0, info->sleep * 1000000};
     while(true){
-        nanosleep(sleepTime, NULL);
+        nanosleep(&sleepTime, NULL);
 
         sem_wait(info->powertrainConveyor->hybridEmpty);
         sem_wait(info->powertrainConveyor->powertrainEmpty);
@@ -165,14 +170,18 @@ void* hybridEngine(void *ptr){
             produced += info->powertrainConveyor->produced[i];
         }
         if(info->numToProduce == produced){
+            sem_post(info->powertrainConveyor->powertrainMutex);
             break; 
         }
 
-        Node* node = newNode(powertrain_producerNames[HybridEngine], HybridEngine, NULL);
+        char str[50];
+        strcpy(str, powertrain_producerNames[HybridEngine]);
+
+        Node* node = newNode(str, HybridEngine, 0);
         enqueue(info->powertrainConveyor->powertrainQueue, node);
         info->powertrainConveyor->produced[HybridEngine]++;
         
-        int* inAssemblyQueue = (int*)malloc(PowertrainTypeN * sizeof(int));
+        unsigned int* inAssemblyQueue = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
         for(int i = 0; i < PowertrainTypeN; i++){
             inAssemblyQueue[i] = info->powertrainConveyor->produced[i] - info->powertrainConveyor->consumed[i];
         }
@@ -184,11 +193,12 @@ void* hybridEngine(void *ptr){
         sem_post(info->powertrainConveyor->powertrainFull);
         sem_post(info->powertrainConveyor->hybridFull);
     }
+    return NULL;
 }
 
 void* titanoRobot(void* ptr){
     PoweredChassisProducer* info = (PoweredChassisProducer*)ptr;
-    struct timespec sleepTime = {0, info->sleep * 1000000};
+    const struct timespec sleepTime = {0, info->sleep * 1000000};
     while(true){
         sem_wait(info->powertrainConveyor->powertrainFull);
         sem_wait(info->powertrainConveyor->powertrainMutex);
@@ -204,7 +214,7 @@ void* titanoRobot(void* ptr){
         Node* node = dequeue(info->powertrainConveyor->powertrainQueue);
         info->poweredChassisConveyor->consumed[node->trainType]++;
 
-        int* inAssemblyQueue = (int*)malloc(PowertrainTypeN * sizeof(int));
+        unsigned int* inAssemblyQueue = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
         for(int i = 0; i < PowertrainTypeN; i++){
             inAssemblyQueue[i] = info->powertrainConveyor->produced[i] - info->powertrainConveyor->consumed[i];
         }
@@ -218,7 +228,7 @@ void* titanoRobot(void* ptr){
             sem_post(info->powertrainConveyor->hybridEmpty);
         }
 
-        nanosleep(sleepTime, NULL);
+        nanosleep(&sleepTime, NULL);
 
         sem_wait(info->poweredChassisConveyor->chassisEmpty);
         sem_wait(info->poweredChassisConveyor->chassisMutex);
@@ -236,11 +246,12 @@ void* titanoRobot(void* ptr){
         sem_post(info->poweredChassisConveyor->chassisMutex);
         sem_post(info->poweredChassisConveyor->chassisEmpty);
     }
+    return NULL;
 }
 
 void* megaForceRobot(void *ptr){
     PoweredChassisProducer* info = (PoweredChassisProducer*)ptr;
-    struct timespec sleepTime = {0, info->sleep * 1000000};
+    const struct timespec sleepTime = {0, info->sleep * 1000000};
     while(true){
         sem_wait(info->powertrainConveyor->powertrainFull);
         sem_wait(info->powertrainConveyor->powertrainMutex);
@@ -256,7 +267,7 @@ void* megaForceRobot(void *ptr){
         Node* node = dequeue(info->powertrainConveyor->powertrainQueue);
         info->poweredChassisConveyor->consumed[node->trainType]++;
 
-        int* inAssemblyQueue = (int*)malloc(PowertrainTypeN * sizeof(int));
+        unsigned int* inAssemblyQueue = (unsigned int*)malloc(PowertrainTypeN * sizeof(int));
         for(int i = 0; i < PowertrainTypeN; i++){
             inAssemblyQueue[i] = info->powertrainConveyor->produced[i] - info->powertrainConveyor->consumed[i];
         }
@@ -270,7 +281,7 @@ void* megaForceRobot(void *ptr){
             sem_post(info->powertrainConveyor->hybridEmpty);
         }
 
-        nanosleep(sleepTime, NULL);
+        nanosleep(&sleepTime, NULL);
 
         sem_wait(info->poweredChassisConveyor->chassisEmpty);
         sem_wait(info->poweredChassisConveyor->chassisMutex);
@@ -288,11 +299,12 @@ void* megaForceRobot(void *ptr){
         sem_post(info->poweredChassisConveyor->chassisMutex);
         sem_post(info->poweredChassisConveyor->chassisEmpty);
     }
+    return NULL;
 }
 
 void* roboMountRobot(void *ptr){
     PoweredChassisConsumer* info = (PoweredChassisConsumer*)ptr;
-    struct timespec sleepTime = {0, info->sleep * 1000000};
+    const struct timespec sleepTime = {0, info->sleep * 1000000};
     while(true){
         sem_wait(info->poweredChassisConveyor->chassisFull);
         sem_wait(info->poweredChassisConveyor->chassisMutex);
@@ -316,7 +328,8 @@ void* roboMountRobot(void *ptr){
         if(totalConsumed == info->numToProduce){
             break;
         }
-        nanosleep(sleepTime, NULL);
+        nanosleep(&sleepTime, NULL);
     }
     sem_post(info->barrier);
+    return NULL;
 }

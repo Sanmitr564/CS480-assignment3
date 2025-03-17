@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <stdlib.h>
 
 #include <string.h>
 #include <pthread.h>
@@ -20,9 +21,8 @@ int main(int argc, char **argv){
     int megaTime = 0;
     int roboTime = 0;
     int option;
-    char *optarg;
 
-    while((option = getopt(argc, argv, "a:b")) != -1){
+    while((option = getopt(argc, argv, "n:g:h:t:m:r")) != -1){
         switch(option){
             case 'n':
                 numVehicles = atoi(optarg);

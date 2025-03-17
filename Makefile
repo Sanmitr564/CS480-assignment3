@@ -5,7 +5,7 @@ CC = gcc
 # -std=c++11  C/C++ variant to use, e.g. C++ 2011
 # -Wall       show the necessary warning files
 # -g3         include information for symbolic debugger e.g. gdb 
-CCFLAGS = -std=c11 -Wall -g3 -c
+CCFLAGS = -std=gnu99 -Wall -g3 -c
 
 # object files
 OBJS = main.o log.o queue.o carProduction.o
@@ -17,8 +17,8 @@ PROGRAM = carassemble
 $(PROGRAM) : $(OBJS)
 	$(CC) -pthread -lrt -o $(PROGRAM) $(OBJS)
 
-main.o : main.C 
-	$(CC) $(CCFLAGS) main.C
+main.o : main.c 
+	$(CC) $(CCFLAGS) main.c
 
 log.o: log.c log.h
 	$(CC) $(CCFLAGS) log.c
