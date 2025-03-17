@@ -10,6 +10,7 @@
 // #include <iostream>
 
 #include "car_assemble.h"
+#include "log.h"
 #include "carProduction.h"
 
 
@@ -70,6 +71,8 @@ int main(int argc, char **argv){
     pthread_create(&roboThread, NULL, roboMountRobot, roboMountInfo);
 
     sem_wait(roboMountInfo->barrier);
+
+    log_powertrain_history(powertrainConveyor->produced, poweredChassisConveyor->consumed);
 
     return 0;
 }
