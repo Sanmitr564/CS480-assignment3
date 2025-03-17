@@ -12,6 +12,8 @@
 #include "robotFunctionality.h"
 
 int main(int argc, char **argv){
+
+    //initialize default options
     int numVehicles = 100;
     int gasProduceTime = 0;
     int hybridProduceTime = 0;
@@ -20,6 +22,7 @@ int main(int argc, char **argv){
     int roboTime = 0;
     int option;
 
+    //parse and correctly assign command line options
     while((option = getopt(argc, argv, "n:g:h:t:m:r:")) != -1){
         switch(option){
             case 'n':
@@ -50,7 +53,8 @@ int main(int argc, char **argv){
         }
     }
 
-     
+    //create data structures to be passed to threads
+    //includes shared and personal info
     PowertrainConveyor* powertrainConveyor = newPowertrainConveyor();
     PoweredChassisConveyor* poweredChassisConveyor = newPoweredChassisConveyor();
     PowertrainProducer* gasInfo = newPowertrainProducer(powertrainConveyor, numVehicles, gasProduceTime);
@@ -59,16 +63,18 @@ int main(int argc, char **argv){
     PoweredChassisProducer* megaForceInfo = newPoweredChassisProducer(powertrainConveyor, poweredChassisConveyor, numVehicles, megaTime);
     PoweredChassisConsumer* roboMountInfo = newPoweredChassisConsumer(poweredChassisConveyor, numVehicles, roboTime);
 
+    //create and run threads
     pthread_t gasThread, hybridThread, titanoThread, megaThread, roboThread;
-
     pthread_create(&gasThread, NULL, gasEngine, gasInfo);
     pthread_create(&hybridThread, NULL, hybridEngine, hybridInfo);
     pthread_create(&titanoThread, NULL, titanoRobot, titanoInfo);
     pthread_create(&megaThread, NULL, megaForceRobot, megaForceInfo);
     pthread_create(&roboThread, NULL, roboMountRobot, roboMountInfo);
 
+    //wait for roboThread to terminate
     sem_wait(roboMountInfo->barrier);
 
+    //print output
     log_powertrain_history(powertrainConveyor->produced, poweredChassisConveyor->consumed);
 
     return 0;
